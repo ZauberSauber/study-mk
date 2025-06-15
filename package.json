@@ -3,7 +3,7 @@
     "node": "22.16.0"
   },
   "scripts": {
-    "start": "npm run dev",
+    "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
