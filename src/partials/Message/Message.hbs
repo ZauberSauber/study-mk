@@ -1,0 +1,8 @@
+{{#if data.isInterlocutor}}
+    <div class="message message_interlocutor">
+{{else}}
+    <div class="message">
+{{/if}}
+    <span class="message-text">{{data.text}}</span>
+    <span class="message-time">{{data.time}}</span>
+</div>
