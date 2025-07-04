@@ -2,20 +2,38 @@
   "engines": {
     "node": "22.16.0"
   },
+  "type": "module",
   "scripts": {
     "start": "vite",
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
-    "stylus": "stylus --watch src/styles/ --out dist/css/"
+    "stylus": "stylus --watch src/styles/ --out dist/css/",
+    "style-fix": "stylelint --fix ./src/**/*.styl",
+    "lint": "eslint"
   },
   "devDependencies": {
+    "@eslint/js": "^9.29.0",
+    "@stylistic/eslint-plugin": "^5.0.0",
+    "@types/eslint": "^9.6.1",
+    "@types/node": "^24.0.3",
+    "@typescript-eslint/eslint-plugin": "^8.34.1",
+    "@typescript-eslint/parser": "^8.34.1",
+    "eslint": "^9.29.0",
+    "globals": "^16.2.0",
     "path": "^0.12.7",
+    "stylelint": "^16.21.0",
+    "stylelint-stylus": "^1.0.0",
     "stylus": "^0.64.0",
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.34.1",
     "vite": "^6.3.5",
+    "vite-plugin-checker": "^0.9.3",
+    "vite-plugin-eslint": "^1.8.1",
     "vite-plugin-handlebars": "^2.0.0"
   },
   "dependencies": {
-    "handlebars": "^4.7.8"
+    "handlebars": "^4.7.8",
+    "uuid": "^11.1.0"
   }
 }

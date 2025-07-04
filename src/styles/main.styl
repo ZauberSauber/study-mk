@@ -1,20 +1,19 @@
 $border-radius = 6px
 
-@require "../partials/Input/input.styl";
-@require "../partials/Button/button.styl";
-@require "../partials/Avatar/avatar.styl";
-@require "../partials/ChatBadge/chatBadge.styl";
-@require "../partials/Message/message.styl";
-@require "../partials/PageError/pageError.styl";
-
-@require "../pages/chat/chatPage.styl";
-
-@require "./block.styl";
+@import "../components/Input/input.styl"
+@import "../components/Button/button.styl"
+@import "../components/Avatar/avatar.styl"
+@import "../components/ChatBadge/chatBadge.styl"
+@import "../components/Message/message.styl"
+@import "../components/PageError/pageError.styl"
+@import "../pages/chat/chatPage.styl"
+@import "./block.styl"
 
 *
-    font-family Verdana, Geneva, Tahoma, sans-serif
-    box-sizing border-box
+  font-family Verdana, Geneva, Tahoma, sans-serif
+  box-sizing border-box
 
-html, body
-    padding 0
-    margin 0
+html
+body
+  padding 0
+  margin 0
