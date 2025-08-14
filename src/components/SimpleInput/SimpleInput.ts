@@ -1,4 +1,4 @@
-import Block from "../../framework/Block";
+import Block, { TEvents } from "../../framework/Block";
 
 type TProps = {
   name: string;
@@ -6,20 +6,18 @@ type TProps = {
   type?: string;
   placeholder?: string;
   validateType?: string;
-  onBlur?: (e: Event) => void;
+  events?: TEvents;
 };
 
 export default class SimpleInput extends Block {
-  constructor({ name, value = "", type = "text", placeholder = "", validateType, onBlur }: TProps) {
+  constructor({ name, value = "", type = "text", placeholder = "", validateType, events }: TProps) {
     super({
       name,
       type,
       validateType,
       value,
       placeholder,
-      events: {
-        ...(onBlur ? { blur: onBlur } : null),
-      },
+      events,
     });
   }
 

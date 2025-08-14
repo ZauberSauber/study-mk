@@ -1,12 +1,13 @@
-import Block from "../../framework/Block";
+import Block, { TEvents } from "../../framework/Block";
 
 type TButtonProps = {
   text?: string;
+  events?: TEvents;
 };
 
 export default class Button extends Block {
-  constructor({text}: TButtonProps) {
-    super({text});
+  constructor({ text, events }: TButtonProps) {
+    super({ text, events });
   }
 
   render() {

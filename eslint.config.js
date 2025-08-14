@@ -21,6 +21,18 @@ export default defineConfig([
       "@stylistic/quote-props": ["error", "as-needed"],
       "@stylistic/quotes": ["error", "double", { "allowTemplateLiterals": true, "avoidEscape": true }],
       "@typescript-eslint/no-unused-vars": "warn",
+      "@stylistic/padding-line-between-statements": [
+        "error",
+        { blankLine: "always", prev: "*", next: ["return"] },
+        { blankLine: "always", prev: ["block-like"], next: "*" },
+        { blankLine: "always", prev: ["const", "let", "var"], next: "*" },
+        { blankLine: "any", prev: ["const", "let", "var"], next: ["const", "let", "var"] },
+      ],
+      "@stylistic/indent": ["error", 2],
+      "@stylistic/object-curly-spacing": ["error", "always"],
+      "@stylistic/eol-last": ["error", "always"],
+      "@stylistic/no-trailing-spaces": "error",
+      "@stylistic/no-multiple-empty-lines": ["error", { "max": 2, "maxEOF": 1 }],
     }
   }
 ]);

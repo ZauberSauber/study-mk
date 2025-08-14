@@ -1,13 +1,15 @@
 import Block from "./framework/Block";
-import { ErrorPage, HomePage, SettingsPage, TErrorPageProps } from "./pages";
+import { ChatPage, ErrorPage, HomePage, LoginPage, RegistrationPage, SettingsPage, TErrorPageProps } from "./pages";
 
 type TAppState = {
   currentPage: string;
 };
 
+type TPageData = Record<string, unknown>;
+
 const DEFAULT_TITLE = "Мой чат";
 
-const pages: { [key: string]: { title?: string, Page: typeof Block, data?: Record<string, unknown> } } = {
+const pages: { [key: string]: { title?: string, Page: typeof Block, data?: TPageData } } = {
   home: {
     title: "Главная",
     Page: HomePage
@@ -15,6 +17,18 @@ const pages: { [key: string]: { title?: string, Page: typeof Block, data?: Recor
   settings: {
     title: "Настройки",
     Page: SettingsPage,
+  },
+  chat: {
+    title: "Чат",
+    Page: ChatPage,
+  },
+  login: {
+    title: "Авторизация",
+    Page: LoginPage,
+  },
+  registration: {
+    title: "Регистрация",
+    Page: RegistrationPage,
   },
   error: {
     title: "Ошибка",

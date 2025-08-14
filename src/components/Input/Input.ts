@@ -1,5 +1,5 @@
 import Block from "../../framework/Block";
-import { TValidateType } from "../../utils/validation";
+import { TValidateType, validate } from "../../utils/validation";
 import { Label } from "../Label/Label";
 import SimpleInput from "../SimpleInput/SimpleInput";
 
@@ -10,12 +10,36 @@ type TProps = {
   placeholder?: string;
   label?: string;
   validateType?: TValidateType;
-  onBlur?: (e: Event) => void;
 };
 
 export default class Input extends Block {
   constructor(props: TProps) {
-    const simpleInput = new SimpleInput(props);
+    const onBlur = (e: Event) => {
+      if (e.target) {
+        const target = e.target as HTMLInputElement;
+        const value = target.value;
+        const fieldName = target.name;
+        const validateType = target.dataset.validate as TValidateType;
+
+        if (!validateType) {
+          return console.warn(`Не указан тип валидации для поля ${fieldName}`);
+        }
+
+        const validationError = validate([{
+          value,
+          validateType,
+          fieldName,
+        }])[0];
+
+        if (validationError) {
+          console.error(validationError[fieldName]);
+        } else {
+          console.log(`Поле ${fieldName} прошло валидацию`);
+        }
+      }
+    };
+
+    const simpleInput = new SimpleInput({ ...props, events: { blur: onBlur } });
     const label = new Label({ text: props?.label || "" });
 
     super({
@@ -28,7 +52,7 @@ export default class Input extends Block {
   render() {
     return `
     <span class="input">
-      ${this.props.hasLabel && "{{{Label}}}"}
+      ${this.props.hasLabel ? "{{{Label}}}" : ""}
       {{{SimpleInput}}}
     </span>`;
   }

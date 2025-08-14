@@ -5,11 +5,11 @@ export default class EventBus {
     this.on = this.on.bind(this);
     this.emit = this.emit.bind(this);
     this.off = this.off.bind(this);
-    
+
     this._listeners = {};
   }
 
-  _listeners: { [key: string]: TCallback[]} = {};
+  _listeners: { [key: string]: TCallback[] } = {};
 
   on(eventName: string, callback: TCallback) {
     if (!this._listeners[eventName]) {
@@ -18,7 +18,7 @@ export default class EventBus {
 
     this._listeners[eventName].push(callback);
   }
-  
+
   off(eventName: string, callback: TCallback) {
     if (!this._listeners[eventName]) {
       throw new Error(`Нет события: ${eventName}`);
@@ -26,7 +26,7 @@ export default class EventBus {
 
     this._listeners[eventName] = this._listeners[eventName].filter(event => event !== callback);
   }
-  
+
   emit(eventName: string, ...args: unknown[]) {
     if (!this._listeners[eventName]) {
       throw new Error(`Нет события: ${eventName}`);

@@ -2,7 +2,7 @@ import EventBus, { TCallback } from "./EventBus";
 import { v4 as makeUUID } from "uuid";
 import Handlebars from "handlebars";
 
-type TEvents = {
+export type TEvents = {
   [key: string]: (e: Event) => void
 };
 
@@ -22,7 +22,7 @@ export default class Block {
 
   _element: HTMLElement | null = null;
   _id: string = "";
-  
+
   props: TBlockProps = {};
   eventBus;
   children: Record<string, Block> = {};
@@ -57,7 +57,14 @@ export default class Block {
 
   private _componentDidMount() {
     this.componentDidMount();
-    Object.values(this.children).forEach(child => { child.dispatchComponentDidMount(); });
+
+    Object.values(this.children).forEach(child => {
+      child.dispatchComponentDidMount();
+    });
+
+    Object.values(this.lists).flat().forEach(child => {
+      child.dispatchComponentDidMount();
+    });
   }
 
   protected componentDidMount(oldProps: TBlockProps = {}) {
@@ -80,6 +87,7 @@ export default class Block {
 
   protected componentDidUpdate(oldProps: TBlockProps = {}, newProps: TBlockProps = {}) {
     console.log(oldProps, newProps);
+
     return true;
   }
 
@@ -137,17 +145,17 @@ export default class Block {
 
   private _render() {
     const propsAndStubs = { ...this.props };
-    const tmpId = makeUUID();
 
     Object.entries(this.children).forEach(([key, child]) => {
       propsAndStubs[key] = `<div data-id="${child._id}"></div>`;
     });
 
     Object.entries(this.lists).forEach(([key]) => {
-      propsAndStubs[key] = `<div data-id="${tmpId}"></div>`;
+      propsAndStubs[key] = `<div data-list-id="${key}"></div>`;
     });
 
     const fragment = this._createDocumentElement("template");
+
     fragment.innerHTML = Handlebars.compile(this.render())(propsAndStubs);
 
     Object.values(this.children).forEach(child => {
@@ -210,6 +218,7 @@ export default class Block {
     return new Proxy(props, {
       get(target: Record<string, unknown>, prop: string) {
         const value = target[prop];
+
         return typeof value === "function" ? value.bind(target) : value;
       },
       set: (target: Record<string, unknown>, prop: string, value: unknown) => {
@@ -220,6 +229,7 @@ export default class Block {
 
           target[prop] = value;
           this.eventBus().emit(Block.EVENTS.FLOW_CDU, oldTarget, target);
+
           return true;
         }
       },
@@ -228,6 +238,7 @@ export default class Block {
           throw new Error("Отказано в доступе к приватному свойству");
         } else {
           delete target[prop as keyof TBlockProps];
+
           return true;
         }
       },

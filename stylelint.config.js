@@ -7,4 +7,4 @@ export default {
         "stylus/semicolon": "never",
         "stylus/declaration-colon": "never"
     },
-  };
+};

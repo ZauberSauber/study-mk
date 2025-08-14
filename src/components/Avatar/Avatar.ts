@@ -6,8 +6,8 @@ type TProps = {
 };
 
 export default class Avatar extends Block {
-  constructor({src, atlText}: TProps) {
-    super({src, atlText});
+  constructor({ src, atlText }: TProps) {
+    super({ src, atlText });
   }
 
   render() {

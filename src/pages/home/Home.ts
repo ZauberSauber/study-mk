@@ -16,27 +16,23 @@ export class HomePage extends Block {
 
       <nav>
         <div>
-          <a href="/login.html" data-nav="login">login page</a>
+          <a data-nav="login">login page</a>
         </div>
 
         <div>
-          <a href="/settings.html" data-nav="settings">settings page</a>
+          <a data-nav="settings">settings page</a>
         </div>
 
         <div>
-          <a href="/registration.html" data-nav="registration">registration page</a>
+          <a data-nav="registration">registration page</a>
         </div>
 
         <div>
-          <a href="/chat.html" data-nav="chat">chat page</a>
+          <a data-nav="chat">chat page</a>
         </div>
 
         <div>
-          <a href="/p404.html" data-nav="p404">404 page</a>
-        </div>
-
-        <div>
-          <a href="/p500.html" data-nav="p500">500 page</a>
+          <a data-nav="p404">404 page</a>
         </div>
       </nav>
     </main>`;

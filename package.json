@@ -10,7 +10,8 @@
     "preview": "vite preview",
     "stylus": "stylus --watch src/styles/ --out dist/css/",
     "style-fix": "stylelint --fix ./src/**/*.styl",
-    "lint": "eslint"
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "devDependencies": {
     "@eslint/js": "^9.29.0",

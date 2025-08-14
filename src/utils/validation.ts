@@ -1,6 +1,7 @@
 
 export const validateName = (name: string): string | null => {
   const regex = /^[A-ZА-ЯЁ][a-zа-яё-]*$/;
+
   if (!name) {
     return `Поле обязательно для заполнения`;
   }
@@ -80,6 +81,7 @@ export const validatePhone = (phone: string): string | null => {
   }
 
   const regex = /^\+?[0-9]{10,15}$/;
+
   if (!regex.test(phone)) {
     return "Телефон должен состоять из 10–15 цифр и может начинаться с плюса";
   }
@@ -91,7 +93,7 @@ export const validateMessage = (message: string): string | null => {
   if (!message || message.trim() === "") {
     return "Сообщение не может быть пустым";
   }
-  
+
   return null;
 };
 
@@ -134,10 +136,45 @@ export const validate = (data: TValidateData[]) => {
     if (fieldError) {
       acc.push({ [fieldName]: fieldError });
     }
-      
+
     return acc;
-    
+
   }, [] as { [key: string]: string }[]);
 
   return errors;
+};
+
+export const validateForm = ({ formId }: { formId: string }) => {
+  const form = document.getElementById(formId) as HTMLFormElement;
+
+  if (!form) {
+    return console.error("Не удалось получить форму", formId);
+  }
+
+  const formData = new FormData(form);
+  const data = Object.fromEntries(formData.entries());
+
+  console.log("Данные формы:", data);
+
+  const inputs = form.getElementsByTagName("input");
+
+  if (!inputs || !inputs?.length) {
+    return console.error("Не удалось получить элементы формы");
+  }
+
+  const valodationErrors = validate(Array.prototype.map.call(inputs, (input: HTMLInputElement) => {
+    return {
+      value: input.value,
+      validateType: input.dataset.validate as TValidateType,
+      fieldName: input.name,
+    };
+  }) as TValidateData[]);
+
+  if (valodationErrors.length) {
+    valodationErrors.forEach((error) => {
+      console.error(error);
+    });
+  } else {
+    console.log("Все поля формы прошли валидацию");
+  }
 };
