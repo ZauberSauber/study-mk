@@ -52,7 +52,7 @@ export class ChatPage extends Block {
 
     <div class="chat-content">
        <div class="chat-active">
-            <img src="activeSrs" class="active-icon">
+            <img src="activeSrs" class="active-icon" alt="Иконка чата">
             <title class="active-name">Название активного чата</title>
        </div>
        <div class="messages">

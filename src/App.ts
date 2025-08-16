@@ -80,9 +80,8 @@ export default class App {
   }
 
   private onClick = (e: Event) => {
-    e.preventDefault();
-
     if (e.target instanceof HTMLAnchorElement) {
+      e.preventDefault();
       const target = e.target as HTMLElement;
       const page = target.dataset.nav;
 

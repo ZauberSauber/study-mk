@@ -10,7 +10,7 @@ type TProps = {
 export class SettingsPage extends Block {
   constructor(props: TProps) {
     const avatar =  new Avatar({ atlText: "Ваш аватар" });
-    const avatarButton =  new Button({ text: "Выбрать новый аватар" });
+    const avatarButton = new Input({ name: "avatar", type: "file", label: "Выбрать новый аватар" });
     const firstNameInput = new Input({ name: "first_name", label: "Имя", value: "Иван", validateType: "name" });
     const secondNameInput = new Input({ name: "second_name", label: "Фамилия", value: "Иванов", validateType: "name" });
     const patronymicInput = new Input({ name: "patronymic", label: "Отчество", value: "Иванович", validateType: "name" });

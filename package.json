@@ -8,6 +8,7 @@
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "serve": "vite build && vite preview",
     "stylus": "stylus --watch src/styles/ --out dist/css/",
     "style-fix": "stylelint --fix ./src/**/*.styl",
     "lint": "eslint",

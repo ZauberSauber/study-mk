@@ -11,6 +11,10 @@ export class RegistrationPage extends Block {
     const loginInput = new Input({ name: "login", placeholder: "Логин", validateType: "login" });
     const passwordInput = new Input({ name: "password", placeholder: "Пароль", validateType: "password" });
     const passwordRepeatInput = new Input({ name: "password-r", placeholder: "Повторите пароль", validateType: "password" });
+    const firstNameInput = new Input({ name: "first-name", placeholder: "Имя", validateType: "name" });
+    const secondNameInput = new Input({ name: "second-name", placeholder: "Фамилия", validateType: "name" });
+    const emailInput = new Input({ name: "email", placeholder: "Email", validateType: "email" });
+    const phoneInput = new Input({ name: "phone", placeholder: "Телефон", validateType: "phone" });
     const createButton = new Button({
       text: "Создать аккаунт",
       events: {
@@ -27,9 +31,11 @@ export class RegistrationPage extends Block {
       PasswordInput: passwordInput,
       PasswordRepeatInput: passwordRepeatInput,
       CreateButton: createButton,
-      events: {
-        ...props.events,
-      }
+      FirstNameInput: firstNameInput,
+      SecondNameInput: secondNameInput,
+      EmailInput: emailInput,
+      PhoneInput: phoneInput,
+      events: props.events,
     });
   }
 
@@ -40,7 +46,23 @@ export class RegistrationPage extends Block {
 
       <form action="#" id="registration-form">
         <div class="block">
+          {{{FirstNameInput}}}
+        </div>
+
+        <div class="block">
+          {{{SecondNameInput}}}
+        </div>
+
+        <div class="block">
           {{{LoginInput}}}
+        </div>
+
+        <div class="block">
+          {{{EmailInput}}}
+        </div>
+
+        <div class="block">
+          {{{PhoneInput}}}
         </div>
 
         <div class="block">

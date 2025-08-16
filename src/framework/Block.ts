@@ -193,6 +193,7 @@ export default class Block {
     const newElement = fragment.content.firstElementChild as HTMLElement;
 
     if (this._element && newElement) {
+      this._removeEvents();
       this._element.replaceWith(newElement);
     }
 
@@ -276,6 +277,20 @@ export default class Block {
     Object.keys(events).forEach(eventName => {
       if (this._element) {
         this._element.addEventListener(eventName as keyof HTMLElementEventMap, events[eventName as keyof HTMLElementEventMap]);
+      }
+    });
+  }
+
+  private _removeEvents() {
+    const { events } = this.props;
+
+    if (!events) {
+      return;
+    }
+
+    Object.keys(events).forEach(eventName => {
+      if (this._element) {
+        this._element.removeEventListener(eventName as keyof HTMLElementEventMap, events[eventName as keyof HTMLElementEventMap]);
       }
     });
   }

@@ -4,51 +4,70 @@ enum METHOD {
   PUT = "PUT",
   PATCH = "PATCH",
   DELETE = "DELETE"
-};
+}
 
-type Options = {
+type RequestOptions = {
   method: METHOD;
-  data?: Document | XMLHttpRequestBodyInit | null | undefined;
-  timeout?: number | null | undefined;
+  data?: string | FormData | null;
+  headers?: Record<string, string>;
+  timeout?: number;
+  responseType?: XMLHttpRequestResponseType;
 };
-
-type OptionsWithoutMethod = Omit<Options, "method">;
 
 export class HTTPTransport {
-  get(url: string, options: OptionsWithoutMethod = {}): Promise<XMLHttpRequest> {
-    return this.request(url, { ...options, method: METHOD.GET });
-  };
-
-  post(url: string, options: OptionsWithoutMethod = {}): Promise<XMLHttpRequest> {
-    return this.request(url, { ...options, method: METHOD.POST });
-  };
-
-  put(url: string, options: OptionsWithoutMethod = {}): Promise<XMLHttpRequest> {
-    return this.request(url, { ...options, method: METHOD.PUT });
-  }
-
-  request(url: string, options: Options = { method: METHOD.GET }): Promise<XMLHttpRequest> {
-    const { method, data, timeout } = options;
+  // Метод для общих HTTP-запросов
+  private request(url: string, options: RequestOptions): Promise<XMLHttpRequest> {
+    const { method, data, headers, timeout, responseType } = options;
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
 
+      // Настройка запроса
       xhr.open(method, url);
 
-      xhr.onload = function () {
-        resolve(xhr);
-      };
+      // Установка заголовков, если они указаны
+      if (headers) {
+        Object.entries(headers).forEach(([key, value]) => {
+          xhr.setRequestHeader(key, value);
+        });
+      }
 
-      xhr.onabort = reject;
-      xhr.onerror = reject;
-      xhr.timeout = timeout || 0;
-      xhr.ontimeout = reject;
+      // Настройка типа ответа
+      if (responseType) {
+        xhr.responseType = responseType;
+      }
 
-      if (method === METHOD.GET || !data) {
-        xhr.send();
-      } else {
+      // Обработчики событий
+      xhr.onload = () => resolve(xhr);
+      xhr.onabort = () => reject(new Error("Запрос отменен"));
+      xhr.onerror = () => reject(new Error(`Ошибка сети: ${xhr.statusText}`));
+      xhr.ontimeout = () => reject(new Error(`Время вышло: ${timeout}ms`));
+
+      // Установка таймаута
+      if (timeout) {
+        xhr.timeout = timeout;
+      }
+
+      // Отправка данных (если это не GET и данные есть)
+      if (method !== METHOD.GET && data !== undefined) {
         xhr.send(data);
+      } else {
+        xhr.send();
       }
     });
-  };
+  }
+
+  // Генератор HTTP-методов
+  private createMethodHandler(method: METHOD) {
+    return (url: string, options: Omit<RequestOptions, "method"> = {}): Promise<XMLHttpRequest> => {
+      return this.request(url, { ...options, method });
+    };
+  }
+
+  // Экспортируемые методы
+  public get = this.createMethodHandler(METHOD.GET);
+  public post = this.createMethodHandler(METHOD.POST);
+  public put = this.createMethodHandler(METHOD.PUT);
+  public patch = this.createMethodHandler(METHOD.PATCH);
+  public delete = this.createMethodHandler(METHOD.DELETE);
 }
