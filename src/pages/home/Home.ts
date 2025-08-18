@@ -15,25 +15,13 @@ export class HomePage extends Block {
       <h1>Главная страница</h1>
 
       <nav>
-        <div>
-          <a data-nav="login">login page</a>
-        </div>
-
-        <div>
-          <a data-nav="settings">settings page</a>
-        </div>
-
-        <div>
-          <a data-nav="registration">registration page</a>
-        </div>
-
-        <div>
-          <a data-nav="chat">chat page</a>
-        </div>
-
-        <div>
-          <a data-nav="p404">404 page</a>
-        </div>
+        <ul>
+          <li><a data-nav="login">login page</a></li>
+          <li><a data-nav="settings">settings page</a></li>
+          <li><a data-nav="registration">registration page</a></li>
+          <li><a data-nav="chat">chat page</a></li>
+          <li><a data-nav="p404">404 page</a></li>
+        </ul>
       </nav>
     </main>`;
   }

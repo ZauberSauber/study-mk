@@ -10,7 +10,7 @@ export class LoginPage extends Block {
   constructor(props: TLoginProps) {
     const loginInput = new Input({ name: "login", placeholder: "Логин", validateType: "login" });
     const passwordInput = new Input({ name: "password", placeholder: "Пароль", validateType: "password" });
-    const loginButton = new Button({ text: "Войти", events: { click: (e: Event) => this.validate(e) } });
+    const loginButton = new Button({ text: "Войти", type: "submit", events: { click: (e: Event) => this.validate(e) } });
     const createButton = new Button({ text: "Создать аккаунт" });
 
     super({

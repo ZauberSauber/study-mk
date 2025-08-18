@@ -8,22 +8,41 @@ enum METHOD {
 
 type RequestOptions = {
   method: METHOD;
-  data?: string | FormData | null;
+  data?: unknown;
   headers?: Record<string, string>;
   timeout?: number;
   responseType?: XMLHttpRequestResponseType;
 };
 
 export class HTTPTransport {
+  // Формирует строку запроса из объекта параметров
+  private queryStringify(params: Record<string, unknown>): string {
+    const keys = Object.keys(params);
+
+    return keys.reduce((result, key, index) => {
+      return `${result}${key}=${params[key]}${index < keys.length - 1 ? "&" : ""}`;
+    }, "?");
+  }
+
   // Метод для общих HTTP-запросов
   private request(url: string, options: RequestOptions): Promise<XMLHttpRequest> {
     const { method, data, headers, timeout, responseType } = options;
+
+    let finalUrl = url;
+
+    if (method === METHOD.GET && data) {
+      const queryString = this.queryStringify(data as Record<string, unknown>);
+
+      finalUrl += (finalUrl.includes("?") ? "&" : "?") + queryString;
+    } else {
+      finalUrl += (finalUrl.includes("?") ? "&" : "?") + data;
+    }
 
     return new Promise((resolve, reject) => {
       const xhr = new XMLHttpRequest();
 
       // Настройка запроса
-      xhr.open(method, url);
+      xhr.open(method, finalUrl);
 
       // Установка заголовков, если они указаны
       if (headers) {
@@ -50,7 +69,7 @@ export class HTTPTransport {
 
       // Отправка данных (если это не GET и данные есть)
       if (method !== METHOD.GET && data !== undefined) {
-        xhr.send(data);
+        xhr.send(JSON.stringify(data));
       } else {
         xhr.send();
       }

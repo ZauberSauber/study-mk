@@ -20,7 +20,7 @@ export class SettingsPage extends Block {
     const loginInput = new Input({ name: "login", label: "Логин", value: "ivanovii", validateType: "login" });
     const oldPasswordInput = new Input({ name: "oldPassword", label: "Действующий пароль", value: "*****" });
     const newPasswordInput = new Input({ name: "newPassword", label: "Новый пароль", validateType: "password" });
-    const saveButton = new Button({ text: "Сохранить", events: { click: (e: Event) => this.onSave(e) } });
+    const saveButton = new Button({ text: "Сохранить", type: "submit", events: { click: (e: Event) => this.onSave(e) } });
 
     super({
       ...props,

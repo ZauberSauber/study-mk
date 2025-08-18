@@ -17,6 +17,7 @@ export class RegistrationPage extends Block {
     const phoneInput = new Input({ name: "phone", placeholder: "Телефон", validateType: "phone" });
     const createButton = new Button({
       text: "Создать аккаунт",
+      type: "submit",
       events: {
         click: (e: Event) => {
           e.preventDefault();

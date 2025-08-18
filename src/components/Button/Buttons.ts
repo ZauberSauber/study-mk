@@ -3,14 +3,15 @@ import Block, { TEvents } from "../../framework/Block";
 type TButtonProps = {
   text?: string;
   events?: TEvents;
+  type?: HTMLButtonElement["type"];
 };
 
 export default class Button extends Block {
-  constructor({ text, events }: TButtonProps) {
-    super({ text, events });
+  constructor({ text, events, type = "button" }: TButtonProps) {
+    super({ text, events, type });
   }
 
   render() {
-    return `<button class="button">{{text}}</button>`;
+    return `<button class="button" type="{{type}}"}>{{text}}</button>`;
   }
 }
