@@ -1,42 +1,99 @@
+import { authApi } from "../../api";
 import { Button, Input } from "../../components";
-import Block, { TBlockProps } from "../../framework/Block";
+import Form from "../../components/Form/Form";
+import { ROUTES } from "../../constants";
+import Block from "../../framework/Block";
+import { Router } from "../../framework/Router";
+import store from "../../framework/Store";
 import { validateForm } from "../../utils/validation";
 
-type TRegistrationProps = {
-  events: TBlockProps;
-};
-
 export class RegistrationPage extends Block {
-  constructor(props: TRegistrationProps) {
+  constructor() {
     const loginInput = new Input({ name: "login", placeholder: "Логин", validateType: "login" });
-    const passwordInput = new Input({ name: "password", placeholder: "Пароль", validateType: "password" });
-    const passwordRepeatInput = new Input({ name: "password-r", placeholder: "Повторите пароль", validateType: "password" });
+    const passwordInput = new Input({ name: "password", type: "password", placeholder: "Пароль", validateType: "password" });
     const firstNameInput = new Input({ name: "first-name", placeholder: "Имя", validateType: "name" });
     const secondNameInput = new Input({ name: "second-name", placeholder: "Фамилия", validateType: "name" });
     const emailInput = new Input({ name: "email", placeholder: "Email", validateType: "email" });
-    const phoneInput = new Input({ name: "phone", placeholder: "Телефон", validateType: "phone" });
-    const createButton = new Button({
-      text: "Создать аккаунт",
-      type: "submit",
+    const phoneInput = new Input({ name: "phone", type: "tel", placeholder: "Телефон", validateType: "phone" });
+    const createButton = new Button({ text: "Создать аккаунт", type: "submit" });
+
+    const template = `
+      <div class="block">
+        {{{FirstNameInput}}}
+      </div>
+
+      <div class="block">
+        {{{SecondNameInput}}}
+      </div>
+
+      <div class="block">
+        {{{LoginInput}}}
+      </div>
+
+      <div class="block">
+        {{{EmailInput}}}
+      </div>
+
+      <div class="block">
+        {{{PhoneInput}}}
+      </div>
+
+      <div class="block">
+        {{{PasswordInput}}}
+      </div>
+
+      <div class="block">
+        {{{CreateButton}}}
+      </div>`;
+
+    const registrationForm = new Form({
+      formId: "registration-form",
+      contentBlocks: {
+        LoginInput: loginInput,
+        PasswordInput: passwordInput,
+        CreateButton: createButton,
+        FirstNameInput: firstNameInput,
+        SecondNameInput: secondNameInput,
+        EmailInput: emailInput,
+        PhoneInput: phoneInput,
+      },
+      template,
       events: {
-        click: (e: Event) => {
+        submit: async (e: Event) => {
           e.preventDefault();
-          validateForm({ formId: "registration-form" });
+          const isValid = validateForm({ formId: "registration-form" });
+
+          if (!isValid) {
+            return;
+          }
+
+          const form = e.target as HTMLFormElement;
+          const formData = new FormData(form);
+          const data = {
+            login: formData.get("login") as string,
+            password: formData.get("password") as string,
+            first_name: formData.get("first-name") as string,
+            second_name: formData.get("second-name") as string,
+            email: formData.get("email") as string,
+            phone: formData.get("phone") as string,
+          };
+
+          try {
+            const result = await authApi.signup(data);
+            const userId = result.id;
+
+            store.set("user", { ...data, id: userId });
+            Router.getInstance().go(ROUTES.chat);
+
+          } catch (error) {
+            console.error(error);
+          }
         }
       }
     });
 
     super({
-      ...props,
-      LoginInput: loginInput,
-      PasswordInput: passwordInput,
-      PasswordRepeatInput: passwordRepeatInput,
-      CreateButton: createButton,
-      FirstNameInput: firstNameInput,
-      SecondNameInput: secondNameInput,
-      EmailInput: emailInput,
-      PhoneInput: phoneInput,
-      events: props.events,
+      RegistrationForm: registrationForm,
     });
   }
 
@@ -45,41 +102,9 @@ export class RegistrationPage extends Block {
     <main>
       <h2>Регистрация</h2>
 
-      <form action="#" id="registration-form">
-        <div class="block">
-          {{{FirstNameInput}}}
-        </div>
+      {{{RegistrationForm}}}
 
-        <div class="block">
-          {{{SecondNameInput}}}
-        </div>
-
-        <div class="block">
-          {{{LoginInput}}}
-        </div>
-
-        <div class="block">
-          {{{EmailInput}}}
-        </div>
-
-        <div class="block">
-          {{{PhoneInput}}}
-        </div>
-
-        <div class="block">
-          {{{PasswordInput}}}
-        </div>
-
-        <div class="block">
-          {{{PasswordRepeatInput}}}
-        </div>
-
-        <div class="block">
-          {{{CreateButton}}}
-        </div>
-      </form>
-
-      <a data-nav="home">Вернуться на гавную</a>
+      <a href="${ROUTES.home}">Вернуться на гавную</a>
     </main>`;
   }
 }

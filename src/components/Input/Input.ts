@@ -1,15 +1,12 @@
-import Block from "../../framework/Block";
+import Block, { TEvents } from "../../framework/Block";
 import { TValidateType, validate } from "../../utils/validation";
 import { Label } from "../Label/Label";
 import SimpleInput from "../SimpleInput/SimpleInput";
 
-type TProps = {
-  name: string;
-  value?: string;
-  type?: string;
-  placeholder?: string;
+type TProps = Partial<HTMLInputElement> & {
   label?: string;
   validateType?: TValidateType;
+  events?: TEvents;
 };
 
 export default class Input extends Block {
@@ -39,7 +36,10 @@ export default class Input extends Block {
       }
     };
 
-    const simpleInput = new SimpleInput({ ...props, events: { blur: onBlur } });
+    const simpleInput = new SimpleInput({
+      ...props,
+      events: { blur: onBlur, ...props.events },
+    });
     const label = new Label({ text: props?.label || "" });
 
     super({

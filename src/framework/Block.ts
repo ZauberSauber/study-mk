@@ -12,23 +12,26 @@ export type TBlockProps = {
   [key: string]: unknown;
 };
 
-export default class Block {
+export default class Block<TProps extends TBlockProps = TBlockProps> {
   static EVENTS = {
     INIT: "init",
     FLOW_CDM: "flow:component-did-mount",
     FLOW_CDU: "flow:component-did-update",
+    FLOW_CWU: "flow:component-will-unmount",
     FLOW_RENDER: "flow:render"
   };
+
+  isMounted = false;
 
   _element: HTMLElement | null = null;
   _id: string = "";
 
-  props: TBlockProps = {};
+  props: TProps;
   eventBus;
   children: Record<string, Block> = {};
   lists: Record<string, Block[]> = {};
 
-  constructor(propsWithChildren = {}) {
+  constructor(propsWithChildren: TProps = {} as TProps) {
     const eventBus = new EventBus();
 
     const { props, children, lists } = this._getChildren(propsWithChildren);
@@ -36,7 +39,7 @@ export default class Block {
     this._id = makeUUID();
     this.children = children;
     this.lists = lists;
-    this.props = this._makePropsProxy(props);
+    this.props = this._makePropsProxy(props as TProps);
 
     this.eventBus = () => eventBus;
 
@@ -48,6 +51,7 @@ export default class Block {
     eventBus.on(Block.EVENTS.INIT, this.init.bind(this));
     eventBus.on(Block.EVENTS.FLOW_CDM, this._componentDidMount.bind(this));
     eventBus.on(Block.EVENTS.FLOW_CDU, this._componentDidUpdate.bind(this) as TCallback);
+    eventBus.on(Block.EVENTS.FLOW_CWU, this._componentWillUnmount.bind(this));
     eventBus.on(Block.EVENTS.FLOW_RENDER, this._render.bind(this));
   }
 
@@ -67,15 +71,13 @@ export default class Block {
     });
   }
 
-  protected componentDidMount(oldProps: TBlockProps = {}) {
-    console.log(oldProps);
-  }
+  protected componentDidMount() {}
 
   protected dispatchComponentDidMount() {
     this.eventBus().emit(Block.EVENTS.FLOW_CDM);
   }
 
-  private _componentDidUpdate(oldProps: TBlockProps, newProps: TBlockProps) {
+  private _componentDidUpdate(oldProps: TProps, newProps: TProps) {
     const response = this.componentDidUpdate(oldProps, newProps);
 
     if (!response) {
@@ -85,13 +87,19 @@ export default class Block {
     this._render();
   }
 
-  protected componentDidUpdate(oldProps: TBlockProps = {}, newProps: TBlockProps = {}) {
+  protected componentDidUpdate(oldProps: TProps, newProps: TProps) {
     console.log(oldProps, newProps);
 
     return true;
   }
 
-  private _getChildren(propsAndChildren: TBlockProps): {
+  private _componentWillUnmount() {
+    this.componentWillUnmount();
+  }
+
+  protected componentWillUnmount() {}
+
+  private _getChildren(propsAndChildren: TProps): {
     children: Record<string, Block>,
     props: TBlockProps,
     lists: Record<string, Block[]>
@@ -131,7 +139,7 @@ export default class Block {
     });
   }
 
-  public setProps = (nextProps: TBlockProps) => {
+  public setProps = (nextProps: TProps) => {
     if (!nextProps) {
       return;
     }
@@ -144,7 +152,7 @@ export default class Block {
   }
 
   private _render() {
-    const propsAndStubs = { ...this.props };
+    const propsAndStubs: Record<string, unknown> = { ...this.props } as Record<string, unknown>;
 
     Object.entries(this.children).forEach(([key, child]) => {
       propsAndStubs[key] = `<div data-id="${child._id}"></div>`;
@@ -195,11 +203,17 @@ export default class Block {
     if (this._element && newElement) {
       this._removeEvents();
       this._element.replaceWith(newElement);
+      this.eventBus().emit(Block.EVENTS.FLOW_CWU);
     }
 
     this._element = newElement;
     this._addEvents();
     this.addAttributes();
+
+    if (!this.isMounted) {
+      this.isMounted = true;
+      this.eventBus().emit(Block.EVENTS.FLOW_CDM);
+    }
   }
 
   // Переопределяется пользователем. Необходимо вернуть разметку
@@ -215,20 +229,20 @@ export default class Block {
     return this.element as HTMLElement;
   }
 
-  private _makePropsProxy(props: TBlockProps): TBlockProps {
+  private _makePropsProxy(props: TProps): TProps {
     return new Proxy(props, {
-      get(target: Record<string, unknown>, prop: string) {
+      get(target, prop: string) {
         const value = target[prop];
 
         return typeof value === "function" ? value.bind(target) : value;
       },
-      set: (target: Record<string, unknown>, prop: string, value: unknown) => {
+      set: (target, prop: string, value: unknown) => {
         if ((prop as string)[0] === "_") {
           throw new Error("Отказано в доступе к приватному свойству");
         } else {
           const oldTarget = { ...target };
 
-          target[prop] = value;
+          target[prop as keyof TProps] = value as TProps[keyof TProps];
           this.eventBus().emit(Block.EVENTS.FLOW_CDU, oldTarget, target);
 
           return true;
@@ -238,7 +252,7 @@ export default class Block {
         if ((prop as string)[0] === "_") {
           throw new Error("Отказано в доступе к приватному свойству");
         } else {
-          delete target[prop as keyof TBlockProps];
+          delete target[prop as keyof TProps];
 
           return true;
         }
@@ -251,7 +265,7 @@ export default class Block {
     return document.createElement(tagName) as HTMLTemplateElement;
   }
 
-  protected show(): void {
+  show(): void {
     const content = this.getContent();
 
     if (content) {
@@ -259,7 +273,7 @@ export default class Block {
     }
   }
 
-  protected hide(): void {
+  hide(): void {
     const content = this.getContent();
 
     if (content) {

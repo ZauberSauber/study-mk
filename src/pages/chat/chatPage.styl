@@ -38,19 +38,21 @@
 
   .chat-input
     padding 5px
-    display grid
-    grid-template-columns auto 95px
+    align-self end
     background #8d8d8d
     height 70px
 
-    #user-input
-      padding 10px
-      margin-right 10px
-      border-radius $border-radius
-      border none
-      &:focus
-        outline none
+    form
+      display grid
+      grid-template-columns auto 95px
+      #user-input
+        padding 10px
+        margin-right 10px
+        border-radius $border-radius
         border none
+        &:focus
+          outline none
+          border none
 
-    .send-button
-      border-radius $border-radius
+      .send-button
+        border-radius $border-radius

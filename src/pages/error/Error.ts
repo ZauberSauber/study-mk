@@ -6,8 +6,8 @@ export type TProps = {
 };
 
 export class ErrorPage extends Block {
-  constructor(props: TProps) {
-    super(props);
+  constructor() {
+    super();
   }
 
   protected render(): string {

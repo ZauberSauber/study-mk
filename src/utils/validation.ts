@@ -144,11 +144,13 @@ export const validate = (data: TValidateData[]) => {
   return errors;
 };
 
-export const validateForm = ({ formId }: { formId: string }) => {
+export const validateForm = ({ formId }: { formId: string }): boolean => {
   const form = document.getElementById(formId) as HTMLFormElement;
 
   if (!form) {
-    return console.error("Не удалось получить форму", formId);
+    console.error("Не удалось получить форму", formId);
+
+    return false;
   }
 
   const formData = new FormData(form);
@@ -159,7 +161,9 @@ export const validateForm = ({ formId }: { formId: string }) => {
   const inputs = form.getElementsByTagName("input");
 
   if (!inputs || !inputs?.length) {
-    return console.error("Не удалось получить элементы формы");
+    console.error("Не удалось получить элементы формы");
+
+    return false;
   }
 
   const valodationErrors = validate(Array.prototype.map.call(inputs, (input: HTMLInputElement) => {
@@ -174,7 +178,11 @@ export const validateForm = ({ formId }: { formId: string }) => {
     valodationErrors.forEach((error) => {
       console.error(error);
     });
+
+    return false;
   } else {
     console.log("Все поля формы прошли валидацию");
+
+    return true;
   }
 };

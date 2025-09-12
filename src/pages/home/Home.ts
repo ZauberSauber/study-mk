@@ -1,12 +1,9 @@
-import Block, { TBlockProps } from "../../framework/Block";
-
-type TProps = {
-  events: TBlockProps;
-};
+import { ROUTES } from "../../constants";
+import Block from "../../framework/Block";
 
 export class HomePage extends Block {
-  constructor(props: TProps) {
-    super(props);
+  constructor() {
+    super();
   }
 
   render() {
@@ -16,11 +13,9 @@ export class HomePage extends Block {
 
       <nav>
         <ul>
-          <li><a data-nav="login">login page</a></li>
-          <li><a data-nav="settings">settings page</a></li>
-          <li><a data-nav="registration">registration page</a></li>
-          <li><a data-nav="chat">chat page</a></li>
-          <li><a data-nav="p404">404 page</a></li>
+          <li><a href="${ROUTES.login}">Логин</a></li>
+          <li><a href="${ROUTES.registration}">Регистрация</a></li>
+          <li><a href="${ROUTES.chat}">В чат</a></li>
         </ul>
       </nav>
     </main>`;

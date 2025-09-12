@@ -1,9 +1,23 @@
+import { MAIN_URL } from "../constants";
+
 enum METHOD {
   GET = "GET",
   POST = "POST",
   PUT = "PUT",
   PATCH = "PATCH",
   DELETE = "DELETE"
+}
+
+export enum HttpStatus {
+  Ok = 200,
+  Created = 201,
+  NoContent = 204,
+  BadRequest = 400,
+  Unauthorized = 401,
+  Forbidden = 403,
+  NotFound = 404,
+  Conflict = 409,
+  InternalServerError = 500,
 }
 
 type RequestOptions = {
@@ -15,6 +29,11 @@ type RequestOptions = {
 };
 
 export class HTTPTransport {
+  private baseUrl: string;
+
+  constructor(baseUrl: string) {
+    this.baseUrl = `${MAIN_URL}${baseUrl}`;
+  }
   // Формирует строку запроса из объекта параметров
   private queryStringify(params: Record<string, unknown>): string {
     const keys = Object.keys(params);
@@ -25,17 +44,14 @@ export class HTTPTransport {
   }
 
   // Метод для общих HTTP-запросов
-  private request(url: string, options: RequestOptions): Promise<XMLHttpRequest> {
+  private request<T>(url: string, options: RequestOptions): Promise<T> {
     const { method, data, headers, timeout, responseType } = options;
-
-    let finalUrl = url;
+    let finalUrl = `${this.baseUrl}${url}`;
 
     if (method === METHOD.GET && data) {
       const queryString = this.queryStringify(data as Record<string, unknown>);
 
-      finalUrl += (finalUrl.includes("?") ? "&" : "?") + queryString;
-    } else {
-      finalUrl += (finalUrl.includes("?") ? "&" : "?") + data;
+      finalUrl += queryString;
     }
 
     return new Promise((resolve, reject) => {
@@ -43,6 +59,7 @@ export class HTTPTransport {
 
       // Настройка запроса
       xhr.open(method, finalUrl);
+      xhr.withCredentials = true;
 
       // Установка заголовков, если они указаны
       if (headers) {
@@ -57,7 +74,64 @@ export class HTTPTransport {
       }
 
       // Обработчики событий
-      xhr.onload = () => resolve(xhr);
+      xhr.onload = () => {
+        switch (xhr.status) {
+          case HttpStatus.Ok:
+          case HttpStatus.Created:
+            if (xhr.responseText === "OK") {
+              resolve(null as unknown as T);
+            } else {
+              try {
+                resolve(JSON.parse(xhr.responseText) as T);
+              } catch {
+                reject(new Error("Ошибка парсинга JSON"));
+              }
+            }
+
+            break;
+          case HttpStatus.NoContent:
+            resolve(null as unknown as T);
+            break;
+
+          case HttpStatus.BadRequest:
+            try {
+              const response = JSON.parse(xhr.responseText);
+
+              if (response.reason === "User already in system") {
+                resolve(response.reason);
+              } else {
+                reject(new Error(`Bad Request (${xhr.status})`));
+              }
+            } catch {
+              reject(new Error("Ошибка парсинга JSON"));
+            }
+
+            break;
+          case HttpStatus.Unauthorized:
+            reject(new Error(`Unauthorized (${xhr.status})`));
+            break;
+          case HttpStatus.Forbidden:
+            reject(new Error(`Forbidden (${xhr.status})`));
+            break;
+          case HttpStatus.NotFound:
+            reject(new Error(`Not Found (${xhr.status})`));
+            break;
+          case HttpStatus.Conflict:
+            reject(new Error(`Conflict (${xhr.status})`));
+            break;
+          case HttpStatus.InternalServerError:
+            reject(new Error(`Internal Server Error (${xhr.status})`));
+            break;
+
+          default:
+            if (xhr.status >= 200 && xhr.status < 300) {
+              resolve(xhr.responseText as unknown as T);
+            } else {
+              reject(new Error(`Unhandled status: ${xhr.status}`));
+            }
+        }
+      };
+
       xhr.onabort = () => reject(new Error("Запрос отменен"));
       xhr.onerror = () => reject(new Error(`Ошибка сети: ${xhr.statusText}`));
       xhr.ontimeout = () => reject(new Error(`Время вышло: ${timeout}ms`));
@@ -69,6 +143,12 @@ export class HTTPTransport {
 
       // Отправка данных (если это не GET и данные есть)
       if (method !== METHOD.GET && data !== undefined) {
+        if (data instanceof FormData) {
+          xhr.send(data);
+
+          return;
+        }
+
         xhr.send(JSON.stringify(data));
       } else {
         xhr.send();
@@ -78,7 +158,7 @@ export class HTTPTransport {
 
   // Генератор HTTP-методов
   private createMethodHandler(method: METHOD) {
-    return (url: string, options: Omit<RequestOptions, "method"> = {}): Promise<XMLHttpRequest> => {
+    return <T>(url: string, options: Record<string, unknown> | FormData = { } ): Promise<T> => {
       return this.request(url, { ...options, method });
     };
   }
