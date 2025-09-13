@@ -16,7 +16,7 @@ export default class ChatBadge extends Block {
 
   render() {
     return `
-    <div class="chat-badge" data-id="${this.props.chatId}">
+    <div class="chat-badge" data-id="${this.props.chatId}" data-title="${this.props.name}">
       <img class="badge-icon" src="" alt="Иконка чата">
       <div class="badge-content">
         <title class="badge-name">${this.props.name}</title>

@@ -10,13 +10,16 @@ import { formatDate } from "../../utils/formatDate";
 
 
 type TChatProps = {
-  chats?: TChat[],
-  chatName?: string,
-  messages?: TMessage[],
+  chats?: TChat[];
+  chatName?: string;
+  messages?: TMessage[];
+  activeChatName?: string;
+  activeChatId?: string;
 };
 
 export class ChatPage extends Block {
-  chatName = "";
+  activeChatName = "";
+  activeChatId = "";
   token = "";
   webSocket: WebSocket | null = null;
   pingInterval: NodeJS.Timeout | null = null;
@@ -85,14 +88,12 @@ export class ChatPage extends Block {
         click: () => {
           authApi.logout()
             .then(() => {
-              Store.set("user", null);
-              Store.set("chats", []);
-              Store.set("currentChatId", null);
-              Router.getInstance().go(ROUTES.login);
+              Store.clear();
             })
             .catch((error) => {
               console.error(error);
-            });
+            })
+            .finally(() => Router.getInstance().go(ROUTES.home));
         }
       }
     });
@@ -215,13 +216,15 @@ export class ChatPage extends Block {
 
           if (target.classList.contains("chat-badge")) {
             const chatId = target.dataset.id as string;
+            const chatName = target.dataset.title as string;
 
             Store.set("currentChatId", chatId);
 
             this.initWebSocket();
 
-            this.chatName = chatId;
-            this.setProps({ chatName: chatId });
+            this.activeChatId = chatId;
+            this.activeChatName = chatName;
+            this.setProps({ activeChatName: chatName, activeChatId: chatId });
           }
         }
       }
@@ -406,6 +409,10 @@ export class ChatPage extends Block {
       isChanged = true;
     }
 
+    if (oldProps.activeChatId !== newProps.activeChatId || oldProps.activeChatName !== newProps.activeChatName) {
+      isChanged = true;
+    }
+
     return isChanged;
   }
 
@@ -421,7 +428,6 @@ export class ChatPage extends Block {
           <nav class="chat-nav">
             <ul>
               <li><a href="${ROUTES.settings}">В настройки</a></li>
-              <li><a href="${ROUTES.home}">На главную</a></li>
             </ul>
           </nav>
 
@@ -434,7 +440,7 @@ export class ChatPage extends Block {
       <div class="chat-content">
         <div class="chat-active">
           <img src="activeSrs" class="active-icon" alt="Иконка чата">
-          <title class="active-name">${this.chatName} Название активного чата</title>
+          <title class="active-name">${this.activeChatId || ""} ${this.activeChatName || "Название активного чата"}</title>
         </div>
         <div class="messages">
           {{{messages}}}

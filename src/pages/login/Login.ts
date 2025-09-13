@@ -2,9 +2,9 @@ import { authApi } from "../../api";
 import { Button, Input } from "../../components";
 import Form from "../../components/Form/Form";
 import { ROUTES } from "../../constants";
+import { Store } from "../../framework";
 import Block from "../../framework/Block";
 import { Router } from "../../framework/Router";
-import store from "../../framework/Store";
 import { validateForm } from "../../utils/validation";
 
 const LOGIN_FORM_ID = "login-form";
@@ -19,8 +19,8 @@ export class LoginPage extends Block {
         click: async () => {
           await authApi.logout()
             .then(() => {
-              store.set("user", null);
-              Router.getInstance().go(ROUTES.login);
+              Store.clear();
+              Router.getInstance().go(ROUTES.home);
             })
             .catch((error) => {
               console.error(error);
@@ -28,7 +28,7 @@ export class LoginPage extends Block {
         } } });
     const createButton = new Button({ text: "Создать аккаунт" });
 
-    const appState = store.getState();
+    const appState = Store.getState();
 
     const logoutButtonTemplate =
       `<div class="block">
@@ -81,7 +81,7 @@ export class LoginPage extends Block {
             await authApi.signin(data);
             const user = await authApi.getUser();
 
-            store.set("user", user);
+            Store.set("user", user);
             Router.getInstance().go(ROUTES.chat);
           } catch (error) {
             console.error("Login failed:", error);

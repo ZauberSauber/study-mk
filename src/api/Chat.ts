@@ -17,7 +17,10 @@ class ChatApi {
   }
 
   deleteChat(chatId: number) {
-    return this.http.delete("", { chatId });
+    return this.http.delete("", {
+      data: { chatId },
+      headers: { "Content-Type": "application/json" },
+    });
   }
 
   getUsers(chatId: number): Promise<TUser[]> {

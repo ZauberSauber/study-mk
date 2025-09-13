@@ -1,3 +1,5 @@
+import { ERROR_ROUTES } from "../constants";
+import { ErrorPage } from "../pages";
 import { isEqual } from "../utils";
 import Block from "./Block";
 
@@ -129,6 +131,20 @@ export class Router {
   }
 
   getRoute(pathname: string) {
-    return this.routes.find(route => route.match(pathname));
+    const appRoute = this.routes.find(route => route.match(pathname));
+
+    if (!appRoute) {
+      if (pathname === ERROR_ROUTES.e500) {
+        return new Route(ERROR_ROUTES.e500, ErrorPage, { rootSelector: this._rootQuery });
+      }
+
+      if (pathname === ERROR_ROUTES.e404) {
+        return new Route(ERROR_ROUTES.e404, ErrorPage, { rootSelector: this._rootQuery });
+      }
+
+      return this.go(ERROR_ROUTES.e404);
+    }
+
+    return appRoute;
   }
 }

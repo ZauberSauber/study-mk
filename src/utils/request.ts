@@ -1,4 +1,6 @@
 import { MAIN_URL } from "../constants";
+import CustomError from "../framework/CustomError";
+import { EHttpStatus } from "../types/network";
 
 enum METHOD {
   GET = "GET",
@@ -6,18 +8,6 @@ enum METHOD {
   PUT = "PUT",
   PATCH = "PATCH",
   DELETE = "DELETE"
-}
-
-export enum HttpStatus {
-  Ok = 200,
-  Created = 201,
-  NoContent = 204,
-  BadRequest = 400,
-  Unauthorized = 401,
-  Forbidden = 403,
-  NotFound = 404,
-  Conflict = 409,
-  InternalServerError = 500,
 }
 
 type RequestOptions = {
@@ -76,8 +66,8 @@ export class HTTPTransport {
       // Обработчики событий
       xhr.onload = () => {
         switch (xhr.status) {
-          case HttpStatus.Ok:
-          case HttpStatus.Created:
+          case EHttpStatus.Ok:
+          case EHttpStatus.Created:
             if (xhr.responseText === "OK") {
               resolve(null as unknown as T);
             } else {
@@ -89,11 +79,11 @@ export class HTTPTransport {
             }
 
             break;
-          case HttpStatus.NoContent:
+          case EHttpStatus.NoContent:
             resolve(null as unknown as T);
             break;
 
-          case HttpStatus.BadRequest:
+          case EHttpStatus.BadRequest:
             try {
               const response = JSON.parse(xhr.responseText);
 
@@ -107,19 +97,19 @@ export class HTTPTransport {
             }
 
             break;
-          case HttpStatus.Unauthorized:
-            reject(new Error(`Unauthorized (${xhr.status})`));
+          case EHttpStatus.Unauthorized:
+            reject(new CustomError(xhr.status, "Unauthorized"));
             break;
-          case HttpStatus.Forbidden:
-            reject(new Error(`Forbidden (${xhr.status})`));
+          case EHttpStatus.Forbidden:
+            reject(new CustomError(xhr.status, "Forbidden"));
             break;
-          case HttpStatus.NotFound:
+          case EHttpStatus.NotFound:
             reject(new Error(`Not Found (${xhr.status})`));
             break;
-          case HttpStatus.Conflict:
+          case EHttpStatus.Conflict:
             reject(new Error(`Conflict (${xhr.status})`));
             break;
-          case HttpStatus.InternalServerError:
+          case EHttpStatus.InternalServerError:
             reject(new Error(`Internal Server Error (${xhr.status})`));
             break;
 

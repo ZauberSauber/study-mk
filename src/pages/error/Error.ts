@@ -1,3 +1,4 @@
+import { ROUTES } from "../../constants";
 import Block from "../../framework/Block";
 
 export type TProps = {
@@ -7,7 +8,9 @@ export type TProps = {
 
 export class ErrorPage extends Block {
   constructor() {
-    super();
+    super({
+      errorCode: window.location.pathname.split("/")[1],
+    });
   }
 
   protected render(): string {
@@ -20,7 +23,7 @@ export class ErrorPage extends Block {
         <span class="error-text">${ message }</span>
       </section>
       <section class="page-error__footer">
-        <a data-nav="home">Перейти на главную</a>
+        <a href="${ROUTES.home}">Перейти на главную</a>
       </section>
     </main>`;
   }
