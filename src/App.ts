@@ -1,93 +1,64 @@
-import Block from "./framework/Block";
-import { ChatPage, ErrorPage, HomePage, LoginPage, RegistrationPage, SettingsPage, TErrorPageProps } from "./pages";
+import { authApi } from "./api";
+import { ROUTES } from "./constants";
+import CustomError from "./framework/CustomError";
+import { Router } from "./framework/Router";
+import Store from "./framework/Store";
+import { ChatPage, LoginPage, RegistrationPage, SettingsPage } from "./pages";
+import { EHttpStatus } from "./types/network";
 
-type TAppState = {
-  currentPage: string;
-};
-
-type TPageData = Record<string, unknown>;
-
-const DEFAULT_TITLE = "Мой чат";
-
-const pages: { [key: string]: { title?: string, Page: typeof Block, data?: TPageData } } = {
-  home: {
-    title: "Главная",
-    Page: HomePage
-  },
-  settings: {
-    title: "Настройки",
-    Page: SettingsPage,
-  },
-  chat: {
-    title: "Чат",
-    Page: ChatPage,
-  },
-  login: {
-    title: "Авторизация",
-    Page: LoginPage,
-  },
-  registration: {
-    title: "Регистрация",
-    Page: RegistrationPage,
-  },
-  error: {
-    title: "Ошибка",
-    Page: ErrorPage
-  }
-};
+const router = new Router("#app");
 
 export default class App {
-  private state: TAppState;
-  private appElement: HTMLElement | null;
+  router: Router;
 
   constructor() {
-    this.state = {
-      currentPage: "home",
-    };
+    this.router = router;
+    this.registerRoutes();
 
-    this.appElement = document.getElementById("app");
-    this.render();
+    this.init();
   }
 
-  render() {
-    let page = pages[this.state.currentPage];
+  async init() {
+    const currentPath = window.location.pathname;
 
-    if (!page) {
-      page = pages.error;
-      page.data  = {
-        errorCode: 404,
-        message: "Страница не найдена",
-      } as TErrorPageProps;
+    if (!Object.values(ROUTES).includes(currentPath)) {
+      return this.router.start();
     }
 
-    document.title = page?.title || DEFAULT_TITLE;
 
-    const currentPage = new page.Page({
-      events: {
-        click: (e: Event) => this.onClick(e)
-      },
-      ...page.data,
-    });
+    await authApi.getUser()
+      .then((user) => {
+        if (user) {
+          Store.set("user", user);
+        }
 
-    if (this.appElement) {
-      this.appElement.replaceChildren(currentPage.getContent() as HTMLElement);
-    }
+        if (currentPath === ROUTES.home || currentPath === ROUTES.registration) {
+          return this.router.go(ROUTES.chat);
+        }
+      })
+      .catch((error) => {
+        if (error instanceof Error) {
+          return console.log(`Ошибка при получении пользователя: ${error.message}`);
+        }
+
+        if (error instanceof CustomError) {
+          if (error.status === EHttpStatus.Unauthorized) {
+            if (currentPath === ROUTES.home || currentPath === ROUTES.registration) {
+              return this.router.go(currentPath);
+            }
+          }
+
+          return this.router.go(ROUTES.home);
+        }
+      })
+      .finally(() => this.router.start());
   }
 
-  changePage(page: string): void {
-    this.state.currentPage = page;
-    this.render();
+  private registerRoutes() {
+    router
+      .use(ROUTES.home, LoginPage)
+      .use(ROUTES.registration, RegistrationPage)
+      .use(ROUTES.settings, SettingsPage)
+      .use(ROUTES.chat, ChatPage);
   }
-
-  private onClick = (e: Event) => {
-    if (e.target instanceof HTMLAnchorElement) {
-      e.preventDefault();
-      const target = e.target as HTMLElement;
-      const page = target.dataset.nav;
-
-      if (page) {
-        this.changePage(page);
-      }
-    }
-  };
 }

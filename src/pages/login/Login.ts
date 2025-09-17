@@ -1,62 +1,109 @@
+import { authApi } from "../../api";
 import { Button, Input } from "../../components";
-import Block, { TBlockProps } from "../../framework/Block";
+import Form from "../../components/Form/Form";
+import { ROUTES } from "../../constants";
+import { Store } from "../../framework";
+import Block from "../../framework/Block";
+import { Router } from "../../framework/Router";
 import { validateForm } from "../../utils/validation";
 
-type TLoginProps = {
-  events: TBlockProps;
-};
+const LOGIN_FORM_ID = "login-form";
 
 export class LoginPage extends Block {
-  constructor(props: TLoginProps) {
+  constructor() {
     const loginInput = new Input({ name: "login", placeholder: "Логин", validateType: "login" });
-    const passwordInput = new Input({ name: "password", placeholder: "Пароль", validateType: "password" });
-    const loginButton = new Button({ text: "Войти", type: "submit", events: { click: (e: Event) => this.validate(e) } });
+    const passwordInput = new Input({ name: "password", placeholder: "Пароль", type: "password", validateType: "password" });
+    const loginButton = new Button({ text: "Войти", type: "submit" });
+    const logoutButton = new Button({
+      text: "Выйти", type: "button", events: {
+        click: async () => {
+          await authApi.logout()
+            .then(() => {
+              Store.clear();
+              Router.getInstance().go(ROUTES.home);
+            })
+            .catch((error) => {
+              console.error(error);
+            });
+        } } });
     const createButton = new Button({ text: "Создать аккаунт" });
 
-    super({
-      ...props,
-      LoginInput: loginInput,
-      PasswordInput: passwordInput,
-      LoginButton: loginButton,
-      CreateButton: createButton,
+    const appState = Store.getState();
+
+    const logoutButtonTemplate =
+      `<div class="block">
+        {{{LogoutButton}}}
+      </div>`;
+
+    const template =
+      `<div class="block">
+        {{{LoginInput}}}
+      </div>
+
+      <div class="block">
+        {{{PasswordInput}}}
+      </div>
+
+      <div class="block">
+        {{{LoginButton}}}
+      </div>
+
+      ${appState?.user ? logoutButtonTemplate : ""}`;
+
+    const loginForm = new Form({
+      formId: LOGIN_FORM_ID,
+      template,
+      contentBlocks: {
+        LoginInput: loginInput,
+        PasswordInput: passwordInput,
+        LoginButton: loginButton,
+        CreateButton: createButton,
+        LogoutButton: logoutButton,
+      },
       events: {
-        ...props.events,
-        login: () => {
-          console.log("login");
+        submit: async (e: Event) => {
+          e.preventDefault();
+          const isValid = validateForm({ formId: LOGIN_FORM_ID });
+
+          if (!isValid) {
+            return;
+          }
+
+          const form = e.target as HTMLFormElement;
+          const formData = new FormData(form);
+
+          const data = {
+            login: formData.get("login") as string,
+            password: formData.get("password") as string
+          };
+
+          try {
+            await authApi.signin(data);
+            const user = await authApi.getUser();
+
+            Store.set("user", user);
+            Router.getInstance().go(ROUTES.chat);
+          } catch (error) {
+            console.error("Login failed:", error);
+          }
         }
       }
     });
-  }
 
-  private validate = (e: Event) => {
-    e.preventDefault();
-    validateForm({ formId: "login-form" });
-  };
+    super({
+      LoginForm: loginForm
+    });
+  }
 
   render() {
     return `
     <main>
       <h2>Вход</h2>
 
-      <form action="#" id="login-form">
-        <div class="block">
-          {{{LoginInput}}}
-        </div>
+      {{{LoginForm}}}
 
-        <div class="block">
-          {{{PasswordInput}}}
-        </div>
-
-        <div class="block">
-          {{{LoginButton}}}
-        </div>
-
-        <div class="block">
-          {{{CreateButton}}}
-        </div>
-      </form>
-
-      <a data-nav="home">Вернуться на гавную</a>
+      <p>Нет аккаунта?</p>
+      <a href="${ROUTES.registration}">Зарегистрироваться</a>
     </main>`;
   }
 }

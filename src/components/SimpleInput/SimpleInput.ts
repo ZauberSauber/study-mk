@@ -1,27 +1,29 @@
 import Block, { TEvents } from "../../framework/Block";
 
-type TProps = {
-  name: string;
-  value?: string;
-  type?: string;
-  placeholder?: string;
+type TProps = Partial<HTMLInputElement> & {
   validateType?: string;
   events?: TEvents;
 };
 
 export default class SimpleInput extends Block {
-  constructor({ name, value = "", type = "text", placeholder = "", validateType, events }: TProps) {
-    super({
-      name,
-      type,
-      validateType,
-      value,
-      placeholder,
-      events,
-    });
+  constructor(props: TProps) {
+    super(props);
   }
 
   render() {
-    return `<input type="${this.props.type}" name="${this.props.name}" value="${this.props.value}" placeholder="${this.props.placeholder}" data-validate="${this.props.validateType || ""}" />`;
+    const attributes = Object.entries(this.props).map(([key, value]) => {
+      if (["events", "validateType"].includes(key)) {
+        return "";
+      }
+
+      return `${key}="${value}"`;
+    }).join(" ");
+
+    return `
+      <input
+        ${attributes}
+        placeholder="${this.props.placeholder || ""}"
+        data-validate="${this.props.validateType || ""}"
+      />`;
   }
 }
