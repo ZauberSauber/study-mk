@@ -2,7 +2,7 @@ import { MAIN_URL } from "../constants";
 import CustomError from "../framework/CustomError";
 import { EHttpStatus } from "../types/network";
 
-enum METHOD {
+export enum METHOD {
   GET = "GET",
   POST = "POST",
   PUT = "PUT",
@@ -25,7 +25,7 @@ export class HTTPTransport {
     this.baseUrl = `${MAIN_URL}${baseUrl}`;
   }
   // Формирует строку запроса из объекта параметров
-  private queryStringify(params: Record<string, unknown>): string {
+  queryStringify(params: Record<string, unknown>): string {
     const keys = Object.keys(params);
 
     return keys.reduce((result, key, index) => {
