@@ -223,7 +223,7 @@ export default class Block<TProps extends TBlockProps = TBlockProps> {
 
   public getContent(): HTMLElement | null {
     if (!this._element) {
-      return null;
+      throw new Error("Нет элемента");
     }
 
     return this.element as HTMLElement;
